@@ -6,19 +6,17 @@ const { Schema } = require("mongoose");
 
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
+const sanitizerPlugin = require('mongoose-sanitizer-plugin');
+
 
 const userSchema = mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
 });
 
-const adminSchema = mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
-
 userSchema.plugin(uniqueValidator);
-adminSchema.plugin(uniqueValidator);
+
+// Plugin pour Mongoose qui purifie les champs du model avant de les enregistrer dans la base MongoDB.
+userSchema.plugin(sanitizerPlugin);
 
 module.exports = mongoose.model('User', userSchema);
-module.exports = mongoose.model('AdminUser', adminSchema);
