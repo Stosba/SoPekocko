@@ -51,7 +51,7 @@ exports.signup = (req, res, next) => {
 //           .catch(error => res.status(400).json({ error }));
 //       })
 //       .catch(error => res.status(500).json({ error }));
-//   } else if (req.body.email = 'admin@gmail.com') {
+//   } else if (req.body.email == 'admin@gmail.com') {
 //     bcrypt.hash(req.body.password, 10)
 //       .then(hash => {
 //         const adminUser = new amdinUser({
@@ -81,7 +81,7 @@ exports.signup = (req, res, next) => {
               userId: user._id,
               token: jwt.sign( // fonction sign dejsonwebtoken pour encoder un nouveau token
                 { userId: user._id }, // token contient l'ID de l'utilisateur en tant que payload (les données encodées dans le token)
-                'RANDOM_TOKEN_SECRET', // chaîne secrète de développement temporaire RANDOM_SECRET_KEY pour encoder notre token
+                process.env.TOKEN, // chaîne secrète de développement temporaire RANDOM_SECRET_KEY pour encoder notre token
                 { expiresIn: '24h' }
               )
             });

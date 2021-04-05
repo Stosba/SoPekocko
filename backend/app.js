@@ -5,8 +5,15 @@ const path = require('path');
 const helmet = require("helmet");
 const cookieSession = require('cookie-session');
 const nocache = require('nocache');
+const rateLimit = require("express-rate-limit");
 const dotenv = require("dotenv");
 dotenv.config();
+
+//constante à utiliser avec le package rateLimit
+const limiter = rateLimit({         
+  windowMs: 15 * 60 * 1000,       // = 15 minutes
+  max: 100
+})
 
 // lien avec les dossier routes
 const saucesRoutes = require('./routes/sauce');
@@ -46,6 +53,12 @@ app.use(cookieSession({
     expires: expiryDate
   }
 }));
+
+// application du package rate limit
+  app.use(limiter);
+
+// limitation de la taille des fihiers
+  // app.use(express.limit('100mb'));
 
 // Helmet permet de sécuriser notre app express en paramettrant divers headers http.
   app.use(helmet());

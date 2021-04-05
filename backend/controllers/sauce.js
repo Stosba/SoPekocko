@@ -45,16 +45,42 @@ exports.getOneSauce = (req, res, next) => {
   };
 
 //   modifier une sauce
-exports.modifySauce = (req, res, next) => {
-    const sauceObject = req.file ? //on crée un objet sauceObject qui regarde si req.file existe ou non.
-      { //S'il existe, on traite la nouvelle image, s'il n'existe pas, on traite simplement l'objet entrant
-        ...JSON.parse(req.body.sauce), //On crée ensuite une instance Sauce à partir de sauceObject , puis on effectue la modification.
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
-      } : { ...req.body }; 
-    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) // utilisation dela méthode updatOne
-      .then(() => res.status(200).json({ message: 'Sauce modifiée !'})) //utilisation du paramètre id de la requête pour configurer notre Sauce avec le même_id qu'avant.
-      .catch(error => res.status(400).json({ error }));
-  };
+// exports.modifySauce = (req, res, next) => {
+//     const sauceObject = req.file ? //on crée un objet sauceObject qui regarde si req.file existe ou non.
+//       { //S'il existe, on traite la nouvelle image, s'il n'existe pas, on traite simplement l'objet entrant
+//         ...JSON.parse(req.body.sauce), //On crée ensuite une instance Sauce à partir de sauceObject , puis on effectue la modification.
+//         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
+//       } : { ...req.body }; 
+//     Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) // utilisation dela méthode updatOne
+//       .then(() => res.status(200).json({ message: 'Sauce modifiée !'})) //utilisation du paramètre id de la requête pour configurer notre Sauce avec le même_id qu'avant.
+//       .catch(error => res.status(400).json({ error }));
+//   };
+
+  exports.modifySauce = (req, res, next) => {
+    let sauceObject = {}; req.file ? (
+      // Si la modification contient une image => Utilisation de l'opérateur ternaire comme structure conditionnelle.
+      Sauce.findOne({_id: req.params.id})
+      .then((sauce) => {
+        // On supprime l'ancienne image du serveur
+        const filename = sauce.imageUrl.split('/images/')[1]
+        fs.unlinkSync(`images/${filename}`)
+      }),
+      sauceObject = {
+        // On modifie les données et on ajoute la nouvelle image
+        ...JSON.parse(req.body.sauce),
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      }
+    ) : (// Si la modification ne contient pas de nouvelle image
+      sauceObject = {...req.body}
+    )
+    Sauce.updateOne(
+        // On applique les paramètre de sauceObject
+        {_id: req.params.id}, 
+        {...sauceObject,_id: req.params.id}
+      )
+      .then(() => res.status(200).json({message: 'Sauce modifiée !'}))
+      .catch((error) => res.status(400).json({error}))
+  }
 
 //   supprimer une sauce
 exports.deleteSauce = (req, res, next) => {
